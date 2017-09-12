@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en_US">
+<head>
+  <meta charset="utf-8">
+  <title>Assignment 2</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.min.js"></script>
+  <script>
+  $(()=> {
+    function fetchPostsForSubreddit(subreddit) {
+      return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        $.getJSON('https://www.reddit.com/r/' + subreddit + '.json', null, function (result) {
+          resolve(result);
+        }).fail((error) => {
+          reject(new Error(error));
+        })
+      }, 1500); //this is to glorify the spinner, currently the request returns too fast for it to spin properly
+      });
+    }
+
+    function doTheFetch (subreddit) {
+        $('#spinner').show();
+        $('.post-list').empty();
+        fetchPostsForSubreddit(subreddit).then((result) => {
+          $('#spinner').hide();
+          const myPosts = [];
+          result.data.children.slice(0,10).forEach(child => {
+            const post = {};
+            post.title = child.data.title
+            post.score = child.data.score
+            post.comments = child.data.num_comments
+            myPosts.push(post)
+          })
+          const template = $('#post-template').html()
+          const renderPosts = Handlebars.compile(template)
+          $('.post-list').html(renderPosts({posts: myPosts}))
+        }, () => {
+          $('#spinner').hide();
+          $('.post-list').html('<h2>Oops! Something went wrong! 🔥</h2>')
+        })
+      }
+
+    $('#go').click(() => {
+      doTheFetch($('#input').val())
+    })
+  })
+
+  </script>
+</head>
+<body>
+  <input type="text" id="input" placeholder="Search for a subreddit...">
+  <button type="button" id="go">Go!</button>
+
+  <script id="post-template" type="text/x-handlebars-template">
+    {{#each posts}}
+      <div class="post">
+        <h3>{{title}}</h3>
+        <div>Score: {{score}}</div>
+        {{#if comments}}
+          <div>Number of Comments: {{comments}}</div>
+        {{else}}
+          <div>No comments. 🤔</div>
+        {{/if}}
+      </div>
+    {{/each}}
+  </script>
+
+  <div class="post-list"></div>
+
+  <i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="display:none" id="spinner"></i>
+  <span class="sr-only">Loading...</span>
+</body>

@@ -12,22 +12,22 @@
       return new Promise((resolve, reject) => {
       setTimeout(() => {
         $.getJSON('https://www.reddit.com/r/' + subreddit + '.json', null, function (result) {
-          resolve(result);
+          resolve(result)
         }).fail((error) => {
-          reject(new Error(error));
+          reject(new Error(error))
         })
-      }, 1500); //this is to glorify the spinner, currently the request returns too fast for it to spin properly
-      });
+      }, 1500) //this is to glorify the spinner, currently the request returns too fast for it to spin properly
+      })
     }
 
     function doTheFetch (subreddit) {
-        $('#spinner').show();
-        $('.post-list').empty();
+        $('#spinner').show()
+        $('.post-list').empty()
         fetchPostsForSubreddit(subreddit).then((result) => {
-          $('#spinner').hide();
-          const myPosts = [];
+          $('#spinner').hide()
+          const myPosts = []
           result.data.children.slice(0,10).forEach(child => {
-            const post = {};
+            const post = {}
             post.title = child.data.title
             post.score = child.data.score
             post.comments = child.data.num_comments
@@ -37,7 +37,7 @@
           const renderPosts = Handlebars.compile(template)
           $('.post-list').html(renderPosts({posts: myPosts}))
         }, () => {
-          $('#spinner').hide();
+          $('#spinner').hide()
           $('.post-list').html('<h2>Oops! Something went wrong! 🔥</h2>')
         })
       }
